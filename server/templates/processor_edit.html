@@ -1,0 +1,18 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block body %}
+<link rel="stylesheet" href="/server/static/css/leaflet/leaflet.css"/>
+<link rel="stylesheet" href="/server/static/css/leaflet/leaflet.draw.css"/>
+<script src="/server/static/js/jquery-3.4.1.js"></script>
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="/server/static/js/leaflet.js"></script>
+<script src="/server/static/js/leaflet.draw.js"></script>
+{{ super() }}
+<div id="preview_hls_wrapper" style="width: 80%; margin: 0 auto; padding: 20px;" hidden>
+    <h3>Обработанное видео</h3>
+    <video id="preview_hls" style="width: 100%; margin: 0 auto; padding: 20px;" controls
+           poster="/server/static/image/preview.png"></video>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/hls.js"></script>
+<script src="/server/static/js/admin_processor_edit.js"></script>
+{% endblock %}

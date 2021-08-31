@@ -1,0 +1,130 @@
+# Author: Katalev Pavel
+# All rights reserved. Copyright (c) 
+version: '3'
+services:
+  app:
+    container_name: hypersight
+    restart: unless-stopped
+    labels:
+      project: "hypersight"
+      day: "28 June 2020"
+    environment:
+      FLASK_APP: server
+      # set database, memcached etc credentials
+      DB_HOST: mysql
+      DB_NAME: flask
+      DB_USER: flask
+      DB_PASSWORD: root
+    build:
+      # build the image from Dockerfile
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/app/logs/
+    links:
+      # network connection with these services
+      - mysql
+    depends_on:
+      # build those images first
+      - mysql
+    ports:
+      # bind on our 5000 port because most people have 80, 8080 already bound
+      - "5000:5000"
+  mysql:
+    container_name: mysql
+    # let's grab from mysql 5.7 image
+    image: mysql:5.7
+    volumes:
+        # pass volume named mysql-data to mysql container
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    labels:
+      project: "hypersight"
+      day: "28 June 2020"
+    # ports:
+    #   - "3306:3306"
+    environment:
+      # credentials
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: flask
+      MYSQL_USER: flask
+      MYSQL_PASSWORD: root
+
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: flask_phpmyadmin
+    restart: unless-stopped
+    labels:
+      project: "hypersight"
+      day: "28 June 2020"
+    ports:
+      - "5010:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: flask
+      PMA_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+      
+  redis:
+    image: "redis:alpine"
+    ports: 
+      - "6379:6379"
+
+# volumes definition here
+volumes:
+  # just a persistance data
+  mysql-data:
+    driver: local
+
+  # hypersight:
+    
+  #   build: .
+  #   container_name: hypersight
+
+  #   restart: on-failure
+  #   environment:
+  #     - FLASK_APP=server
+  #   ports:
+  #     - "5001:5001" 
+  #     - "5000:5000" 
+  #     - "5007:5007"
+  #   expose:
+  #     # Opens port 5000 on the container
+  #     - "5000"
+
+  #   links:
+  #     - mysql
+  #     - redis
+  #   volumes:
+  #     - ./logs:/app/logs/
+    
+  
+  # celery:
+  #   image: hypersight
+  #   environment:
+  #     - CELERYD_NODES="w1"
+  #     - CELERY_BIN="venv/bin/celery"
+  #     - CELERY_APP="celery_worker.py"
+  #     # How to call manage.py
+  #     - CELERYD_MULTI="multi"
+
+  #     # Extra command-line arguments to the worker
+  #     - CELERYD_OPTS="--autoscale=10000,1"
+
+  #     # - %n will be replaced with the first part of the nodename.
+  #     # - %I will be replaced with the current child process index
+  #     #   and is important when using the prefork pool to avoid race conditions.
+  #     - CELERYD_PID_FILE="/var/run/celery_%n.pid"
+  #     - CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
+  #     - CELERYD_LOG_LEVEL="INFO"
+
+  #     # you may wish to add these options for Celery Beat
+  #     - CELERYBEAT_PID_FILE="/var/run/celery_beat.pid"
+  #     - CELERYBEAT_LOG_FILE="/var/log/celery/beat.log"
+  #   entrypoint: "/bin/sh -c '${CELERY_BIN} multi start ${CELERYD_NODES} \
+  #   -A ${CELERY_APP} --pidfile=${CELERYD_PID_FILE} \
+  #   --logfile=${CELERYD_LOG_FILE} --loglevel=${CELERYD_LOG_LEVEL} ${CELERYD_OPTS}'"
+
+    

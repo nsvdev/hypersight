@@ -1,0 +1,14 @@
+.idea
+venv
+
+.vscode/
+mysql_db/
+server/__pycache__/
+server/instance/__pycache__/
+*.sqlite
+logs/
+processed
+videos
+tools/
+frames/
+out
